@@ -1,0 +1,58 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+exclude: 'media|templates|static|migrations'
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.5.0
+    hooks:
+      - id: no-commit-to-branch
+        args: [-b master]
+      - id: check-ast
+      - id: check-builtin-literals
+      - id: check-docstring-first
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=1700']
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: debug-statements
+      - id: pretty-format-json
+        args: [--autofix, --indent=4]
+      - id: double-quote-string-fixer
+      - id: name-tests-test
+        args: [--django]
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: requirements-txt-fixer
+
+  - repo: https://github.com/asottile/add-trailing-comma
+    rev: v1.5.0
+    hooks:
+      - id: add-trailing-comma
+        args: [--py36-plus]
+
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.7.9
+    hooks:
+      - id: flake8
+
+  - repo: https://github.com/pycqa/pydocstyle
+    rev: 5.0.2  # pick a git hash / tag to point to
+    hooks:
+      - id: pydocstyle
+
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.5.1
+    hooks:
+      - id: python-check-mock-methods
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v1.26.2
+    hooks:
+      - id: pyupgrade
+        args: [--py3-plus]
+
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: v0.12.0
+    hooks:
+      - id: gitlint

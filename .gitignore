@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Pycharm folder
+.idea/
+
+# misc
+run_app.sh
+tmp/

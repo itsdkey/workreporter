@@ -1,0 +1,38 @@
+{
+    "blocks": [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": ":bell:  *Pull requests newsletter*  :bell:"
+            }
+        },
+        {
+            "elements": [
+                {
+                    "text": "*Author:* dave",
+                    "type": "mrkdwn"
+                },
+                {
+                    "text": "",
+                    "type": "mrkdwn"
+                }
+            ],
+            "type": "context"
+        },
+        {
+            "type": "divider"
+        },
+        {
+            "text": {
+                "emoji": true,
+                "text": "No pull requests. Good Job everyone! :v:",
+                "type": "plain_text"
+            },
+            "type": "section"
+        },
+        {
+            "type": "divider"
+        }
+    ]
+}
