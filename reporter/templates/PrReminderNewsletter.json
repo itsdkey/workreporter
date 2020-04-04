@@ -1,0 +1,49 @@
+{
+	"blocks": [
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": ":bulb:  *Pull requests newsletter*  :bulb:"
+			}
+		},
+		{
+			"type": "divider"
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": " :loud_sound: *PY 3 - Shop - brak możliwości anulacji zamówienia - 500 ka* :loud_sound:"
+			}
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "@Krzysztof Jaworowski @Piotr Stankiewicz @Marcin Drobnik"
+			},
+			"accessory": {
+				"type": "button",
+				"url": "",
+				"text": {
+					"type": "plain_text",
+					"text": "Review Now",
+					"emoji": true
+				}
+			}
+		},
+		{
+			"type": "divider"
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "mrkdwn",
+					"text": "*Author:* PRreminder"
+				}
+			]
+		}
+	]
+}
