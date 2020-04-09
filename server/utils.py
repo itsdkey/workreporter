@@ -5,7 +5,7 @@ from redis import Redis
 from .configuration.settings import (
     REDIS_DATABASE,
     REDIS_PASSWORD,
-    REDIS_SOCKET_PATH
+    REDIS_SOCKET_PATH,
 )
 
 

@@ -19,7 +19,7 @@ from ..factories import (
     SectionBlockFactory,
     SectionButtonFactory,
     SlackMessageFactory,
-    StatusFactory
+    StatusFactory,
 )
 
 
@@ -136,6 +136,7 @@ class TestIntegrity(TestCase):
                 JiraIssueFactory.create(fields__status=StatusFactory.create(name='In Review')),
             ],
         )
+        key, title = (jira_response['issues'][0]['key'], jira_response['issues'][0]['fields']['summary'])
         bitbucket_issue = BitBucketIssueFactory.create(
             id=jira_response['issues'][0]['id'],
             status='In Review',
@@ -162,7 +163,7 @@ class TestIntegrity(TestCase):
                 ContextBlockFactory.create(),
                 DividerBlockFactory.create(),
                 SectionBlockFactory.create(
-                    text__text=f':bender: *[{jira_response["issues"][0]["key"]}] {jira_response["issues"][0]["fields"]["summary"]}*',
+                    text__text=f':bender: *[{key}] {title}*',
                     text__type='mrkdwn',
                 ),
                 SectionButtonFactory.create(
@@ -192,6 +193,7 @@ class TestIntegrity(TestCase):
                 JiraIssueFactory.create(fields__status=StatusFactory.create(name='In Review')),
             ],
         )
+        key, title = (jira_response['issues'][0]['key'], jira_response['issues'][0]['fields']['summary'])
         bitbucket_issue = BitBucketIssueFactory.create(
             id=jira_response['issues'][0]['id'],
             status='In Review',
@@ -214,7 +216,7 @@ class TestIntegrity(TestCase):
                 ContextBlockFactory.create(),
                 DividerBlockFactory.create(),
                 SectionBlockFactory.create(
-                    text__text=f':bender: *[{jira_response["issues"][0]["key"]}] {jira_response["issues"][0]["fields"]["summary"]}*',
+                    text__text=f':bender: *[{key}] {title}*',
                     text__type='mrkdwn',
                 ),
                 SectionButtonFactory.create(
@@ -281,6 +283,10 @@ class TestIntegrity(TestCase):
         jira_response = JiraResponseFactory.create(
             issues=JiraIssueFactory.create_batch(size=2, fields__status=StatusFactory.create(name='In Review')),
         )
+        keys, titles = (
+            (jira_response['issues'][0]['key'], jira_response['issues'][1]['key']),
+            (jira_response['issues'][0]['fields']['summary'], jira_response['issues'][1]['fields']['summary']),
+        )
         bitbucket_issues = BitBucketIssueFactory.create_batch(
             size=2,
             id=Iterator([i['id'] for i in jira_response['issues']]),
@@ -311,7 +317,7 @@ class TestIntegrity(TestCase):
                 ContextBlockFactory.create(),
                 DividerBlockFactory.create(),
                 SectionBlockFactory.create(
-                    text__text=f':bender: *[{jira_response["issues"][0]["key"]}] {jira_response["issues"][0]["fields"]["summary"]}*',
+                    text__text=f':bender: *[{keys[0]}] {titles[0]}*',
                     text__type='mrkdwn',
                 ),
                 SectionButtonFactory.create(
@@ -322,7 +328,7 @@ class TestIntegrity(TestCase):
                 ),
                 DividerBlockFactory.create(),
                 SectionBlockFactory.create(
-                    text__text=f':bender: *[{jira_response["issues"][1]["key"]}] {jira_response["issues"][1]["fields"]["summary"]}*',
+                    text__text=f':bender: *[{keys[1]}] {titles[1]}*',
                     text__type='mrkdwn',
                 ),
                 SectionButtonFactory.create(
@@ -349,6 +355,10 @@ class TestIntegrity(TestCase):
         """
         jira_response = JiraResponseFactory.create(
             issues=JiraIssueFactory.create_batch(size=2, fields__status=StatusFactory.create(name='In Review')),
+        )
+        keys, titles = (
+            (jira_response['issues'][0]['key'], jira_response['issues'][1]['key']),
+            (jira_response['issues'][0]['fields']['summary'], jira_response['issues'][1]['fields']['summary']),
         )
         bitbucket_issues = BitBucketIssueFactory.create_batch(
             size=2,
@@ -379,7 +389,7 @@ class TestIntegrity(TestCase):
                 ContextBlockFactory.create(),
                 DividerBlockFactory.create(),
                 SectionBlockFactory.create(
-                    text__text=f':bender: *[{jira_response["issues"][0]["key"]}] {jira_response["issues"][0]["fields"]["summary"]}*',
+                    text__text=f':bender: *[{keys[0]}] {titles[0]}*',
                     text__type='mrkdwn',
                 ),
                 SectionButtonFactory.create(
@@ -396,7 +406,7 @@ class TestIntegrity(TestCase):
                 ),
                 DividerBlockFactory.create(),
                 SectionBlockFactory.create(
-                    text__text=f':bender: *[{jira_response["issues"][1]["key"]}] {jira_response["issues"][1]["fields"]["summary"]}*',
+                    text__text=f':bender: *[{keys[1]}] {titles[1]}*',
                     text__type='mrkdwn',
                 ),
                 SectionButtonFactory.create(
