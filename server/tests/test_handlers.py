@@ -4,6 +4,7 @@ import json
 from time import time
 from unittest.mock import patch
 
+from fakeredis import FakeRedis
 from slack import WebClient
 from tornado.testing import AsyncHTTPTestCase
 from tornado.web import Application, url
@@ -31,7 +32,7 @@ class HomeHandlerTestCase(AsyncHTTPTestCase):
         response = self.fetch('/')
 
         self.assertEqual(response.code, 200)
-        self.assertEqual(response.body.decode('utf-8'), 'Hello world!')
+        self.assertEqual(response.body.decode(), 'Hello world!')
 
 
 class SlackHandlerTestCase(AsyncHTTPTestCase):
@@ -42,12 +43,17 @@ class SlackHandlerTestCase(AsyncHTTPTestCase):
         """Set up class fixture before running tests in the class."""
         cls.url = '/slack/events/'
         cls.signing_secret = SIGNING_SECRET
+        cls.fake_redis = FakeRedis()
 
     def setUp(self) -> None:
         """Set up the test fixture before exercising it."""
         super().setUp()
         self.addCleanup(patch.stopall)
         self.task_delay = patch('server.handlers.handle_message.delay').start()
+        patch('server.utils.Redis', return_value=self.fake_redis).start()
+
+    def tearDown(self) -> None:
+        self.fake_redis.flushall()
 
     def get_app(self) -> Application:
         """Return a Tornado application."""
@@ -61,7 +67,7 @@ class SlackHandlerTestCase(AsyncHTTPTestCase):
     def _prepare_headers(self, body: dict) -> dict:
         """Prepare request headers."""
         timestamp = str(int(time()))
-        body = json.dumps(body).encode('utf-8')
+        body = json.dumps(body).encode()
         req = str.encode('v0:' + timestamp + ':') + body
         request_hash = 'v0=' + hmac.new(
             str.encode(self.signing_secret),
@@ -88,7 +94,7 @@ class SlackHandlerTestCase(AsyncHTTPTestCase):
         )
 
         self.assertEqual(response.code, 200)
-        self.assertEqual(response.body.decode('utf-8'), data['challenge'])
+        self.assertEqual(response.body.decode(), data['challenge'])
 
     def test_post_returns_forbidden_when_request_timestamp_is_not_given(self):
         """Test post returns 403 when there is no X-Slack-Request-Timestamp header."""

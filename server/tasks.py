@@ -1,14 +1,17 @@
 import asyncio
-from typing import Optional
+import json
 import os
 
 from celery.utils.log import get_task_logger
+from slack import WebClient
 
-from server.configuration.settings import BASE_DIR
 from reporter.apps import SlackApp
 from reporter.bridge import Bridge
+from reporter.conf import SLACK_TOKEN
+from server.configuration.settings import BASE_DIR
 
 from .celery import app
+from .utils import get_redis_instance, validate_text
 
 logger = get_task_logger('server')
 
@@ -47,7 +50,7 @@ def handle_message(message: dict) -> None:
     logger.debug(f'handle_message task with message: {message}')
     channel = message['channel']
     loop = asyncio.get_event_loop()
-    sprint_number = _validate_text(message.get('text'))
+    sprint_number = validate_text(message.get('text'))
     if sprint_number:
         logger.debug(f'running for sprint: {sprint_number}')
         bridge = Bridge(sprint_number, channel_id=channel, loop=loop)
@@ -62,17 +65,10 @@ def handle_message(message: dict) -> None:
         )
 
 
-def _validate_text(text: str) -> Optional[int]:
-    """
-    Validate text message.
-
-    :param text: text to validate
-    """
-    if text.lower().startswith('sprint '):
-        sprint, sprint_number = text.split(' ', 1)
-        try:
-            sprint_number = int(sprint_number)
-        except ValueError:
-            return None
-        return sprint_number
-    return None
+@app.task
+def update_workspace_users() -> None:
+    """Update slack's workspace users to Redis."""
+    slack = WebClient(token=SLACK_TOKEN)
+    users = slack.users_list()
+    with get_redis_instance() as redis:
+        redis.set('slack-members', json.dumps(users['members']))

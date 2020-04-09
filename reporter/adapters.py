@@ -83,8 +83,7 @@ class JiraAdapter(BaseAdapter):
             'fields': ['assignee', 'status', 'summary'],
         }
         response = self._get(endpoint_path, data)
-        # return response['issues']
-        return self._parser.get_issues_with_state('In Review', response)
+        return self._parser.filter_out_important_data(response)
 
     async def get_pull_requests(self, issues: list) -> list:
         """
