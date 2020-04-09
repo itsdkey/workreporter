@@ -112,7 +112,8 @@ class SlackApp:
             pass
 
         mention = name
-        user = self._get_user(name, get_value_from_redis('slack-members'))
+        users = get_value_from_redis('slack-members') or []
+        user = self._get_user(name, users)
         if user:
             mention = f'<@{user["id"]}>'
 
