@@ -3,6 +3,7 @@ from unittest.mock import ANY
 from aiohttp import ClientSession
 from asynctest import CoroutineMock, MagicMock, TestCase, patch
 from factory import Iterator
+from fakeredis import FakeRedis
 from responses import RequestsMock
 from slack import WebClient
 
@@ -33,7 +34,7 @@ class TestIntegrity(TestCase):
         cls.jira_sprint_api_url = f'https://empsgourp.atlassian.net/rest/agile/1.0/sprint/{cls.sprint}/issue'
         cls.jira_dev_tools_api_url = 'https://empsgourp.atlassian.net/rest/dev-status/1.0/issue/detail'
 
-        cls.bridge = Bridge(cls.sprint)
+        cls.fake_redis = FakeRedis()
         cls.responses = RequestsMock()
 
     def setUp(self):
@@ -41,15 +42,19 @@ class TestIntegrity(TestCase):
         self.responses.start()
 
         self.addCleanup(patch.stopall)
+        patch('reporter.utils.get_redis_instance', return_value=self.fake_redis).start()
         self.patcher = patch.object(WebClient, 'chat_postMessage', new=CoroutineMock())
         self.chat_postMessage = self.patcher.start()
         patch.object(WebClient, 'users_list', new=CoroutineMock(return_value=self._get_users_list())).start()
         self.m_get = patch.object(ClientSession, 'get', return_value=MagicMock()).start()
 
+        self.bridge = Bridge(self.sprint)
+
     def tearDown(self):
         """Deconstruct the test fixture after testing it."""
         self.responses.stop()
         self.responses.reset()
+        self.fake_redis.flushall()
 
     @staticmethod
     def _get_users_list():

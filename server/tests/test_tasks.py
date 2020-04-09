@@ -1,6 +1,7 @@
 from io import StringIO
 
 from asynctest import ANY, CoroutineMock, TestCase, patch
+from fakeredis import FakeRedis
 from slack import WebClient
 
 from reporter.bridge import Bridge
@@ -14,13 +15,18 @@ class HandleMessageTestCase(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         """Set up class fixture before running tests in the class."""
+        cls.fake_redis = FakeRedis()
         cls.task = handle_message
 
     def setUp(self) -> None:
         """Set up the test fixture before exercising it."""
         self.addCleanup(patch.stopall)
+        patch('server.utils.Redis', return_value=self.fake_redis).start()
         self.m_post_message = patch.object(WebClient, 'chat_postMessage', new=CoroutineMock()).start()
         self.bridge_run = patch.object(Bridge, 'run', new=CoroutineMock()).start()
+
+    def tearDown(self) -> None:
+        self.fake_redis.flushall()
 
     def test_task_informs_that_the_message_text_is_not_valid(self):
         """Test task informs that the message's text is not valid."""
@@ -112,12 +118,17 @@ class HandleChangelogTestCase(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         """Set up class fixture before running tests in the class."""
+        cls.fake_redis = FakeRedis()
         cls.task = display_changelog
 
     def setUp(self) -> None:
         """Set up the test fixture before exercising it."""
         self.addCleanup(patch.stopall)
         self.m_post_message = patch.object(WebClient, 'chat_postMessage', new=CoroutineMock()).start()
+        patch('server.utils.Redis', return_value=self.fake_redis).start()
+
+    def tearDown(self) -> None:
+        self.fake_redis.flushall()
 
     @patch('server.tasks.open')
     def test_task_posts_content_of_the_changelog(self, m_open):

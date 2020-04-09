@@ -4,6 +4,7 @@ import json
 from time import time
 from unittest.mock import patch
 
+from fakeredis import FakeRedis
 from slack import WebClient
 from tornado.testing import AsyncHTTPTestCase
 from tornado.web import Application, url
@@ -42,12 +43,17 @@ class SlackHandlerTestCase(AsyncHTTPTestCase):
         """Set up class fixture before running tests in the class."""
         cls.url = '/slack/events/'
         cls.signing_secret = SIGNING_SECRET
+        cls.fake_redis = FakeRedis()
 
     def setUp(self) -> None:
         """Set up the test fixture before exercising it."""
         super().setUp()
         self.addCleanup(patch.stopall)
         self.task_delay = patch('server.handlers.handle_message.delay').start()
+        patch('server.utils.Redis', return_value=self.fake_redis).start()
+
+    def tearDown(self) -> None:
+        self.fake_redis.flushall()
 
     def get_app(self) -> Application:
         """Return a Tornado application."""

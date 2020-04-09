@@ -4,6 +4,7 @@ asynctest
 Celery
 coverage
 factory_boy
+fakeredis
 flake8
 gitlint
 ipdb
