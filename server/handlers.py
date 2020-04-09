@@ -6,8 +6,8 @@ from typing import Awaitable, Optional
 from tornado.escape import json_decode
 from tornado.web import HTTPError, RequestHandler, access_log
 
-from server.configuration.settings import SIGNING_SECRET
 from reporter.apps import SlackApp
+from server.configuration.settings import SIGNING_SECRET
 
 from .tasks import handle_message
 

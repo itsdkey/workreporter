@@ -11,8 +11,9 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 import os
 import sys
+
 BASE_DIR = os.path.dirname(__file__)
-PROJECT_ROOT = os.path.dirname(BASE_DIR)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(BASE_DIR))
 sys.path.insert(0, PROJECT_ROOT)
 
 # -- Project information -----------------------------------------------------

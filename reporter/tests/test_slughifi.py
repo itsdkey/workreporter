@@ -13,7 +13,7 @@ class SlughifiTestCase(TestCase):
 
         result = slughifi(name)
 
-        self.assertEqual(result.decode('utf-8'), expected_result)
+        self.assertEqual(result.decode(), expected_result)
 
     def test_slughifi_returns_char_when_not_in_map(self):
         """Test checking if a char was returned when not found in the mapping."""
@@ -21,4 +21,4 @@ class SlughifiTestCase(TestCase):
 
         result = slughifi(name)
 
-        self.assertEqual(result.decode('utf-8'), name)
+        self.assertEqual(result.decode(), name)

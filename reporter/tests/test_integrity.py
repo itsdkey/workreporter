@@ -19,7 +19,7 @@ from ..factories import (
     SectionBlockFactory,
     SectionButtonFactory,
     SlackMessageFactory,
-    StatusFactory,
+    StatusFactory
 )
 
 

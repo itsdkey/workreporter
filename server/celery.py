@@ -1,6 +1,5 @@
 from celery import Celery
 
-
 app = Celery('server')
 app.config_from_object('server.configuration.celeryconfig')
 

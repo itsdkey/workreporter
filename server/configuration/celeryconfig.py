@@ -25,4 +25,9 @@ beat_schedule = {
         'schedule': crontab(minute=0, hour='7,9,11,13,15', day_of_week='mon-fri'),
         'args': None,
     },
+    'update-workspace-users': {
+        'task': 'server.tasks.update_workspace_users',
+        'schedule': crontab(minute=0, hour=0, day_of_week='mon-fri'),
+        'args': None,
+    },
 }

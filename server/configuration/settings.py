@@ -21,3 +21,7 @@ settings = {
 secure_pages = []
 
 SIGNING_SECRET = os.environ['SLACK_SIGNING_SECRET']
+
+REDIS_SOCKET_PATH = os.environ.get('REDIS_SOCKET_PATH', None)
+REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', None)
+REDIS_DATABASE = os.environ.get('REDIS_DATABASE', 0)

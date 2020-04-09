@@ -5,6 +5,6 @@ Code documentation
     :members:
     :show-inheritance:
 
-.. automodule:: spammer
+.. automodule:: reporter
     :members:
     :show-inheritance:
