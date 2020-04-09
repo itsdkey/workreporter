@@ -2,6 +2,17 @@
 CHANGELOG
 =========
 
+0.0.4 (9.04.2020)
+-----------------
+
+**Updates**
+
+1. Moved filtering pull requests to parsers. From now on the parser returns only
+pull requests that have reviewers that did not give an approval.
+
+2. Changed the pull requests message title and ticket title.
+
+
 0.0.3 (23.03.2020)
 ------------------
 

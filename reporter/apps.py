@@ -10,7 +10,7 @@ from .adapters import JiraAdapter
 from .conf import SLACK_CHANNEL_ID, SLACK_TOKEN, JIRA_SPRINT
 from .slughify import slughifi
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 
 class JiraApp:
@@ -86,17 +86,16 @@ class SlackApp:
             descriptions = []
             for pull_request in issue['pull_requests']:
                 description = deepcopy(description_block)
-                reviewers = []
-                for reviewer in pull_request['reviewers']:
-                    if not reviewer['approved']:
-                        reviewers.append(self._get_user_mention(reviewer.get('name'), users))
-                if reviewers:
-                    description['text']['text'] = ' '.join(reviewers)
-                    description['accessory']['url'] = pull_request['url']
-                    descriptions.append(description)
+                reviewers = map(
+                    lambda name: self._get_user_mention(name, users),
+                    pull_request['reviewers'],
+                )
+                description['text']['text'] = ' '.join(reviewers)
+                description['accessory']['url'] = pull_request['url']
+                descriptions.append(description)
 
             if descriptions:
-                title['text']['text'] = f' :bender: *{issue["title"]}* :bender:'
+                title['text']['text'] = f':bender: *[{issue["key"]}] {issue["title"]}*'
                 message['blocks'].extend([title] + descriptions + [divider])
 
         await self.send_message(message)

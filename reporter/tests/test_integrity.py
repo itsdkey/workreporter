@@ -81,7 +81,7 @@ class TestIntegrity(TestCase):
         return SlackMessageFactory.create(
             blocks=[
                 SectionBlockFactory.create(
-                    text__text=':bell:  *Pull requests newsletter*  :bell:',
+                    text__text=':bell:  *Pull requests report*  :bell:',
                     text__type='mrkdwn',
                 ),
                 ContextBlockFactory.create(),
@@ -94,29 +94,6 @@ class TestIntegrity(TestCase):
                 DividerBlockFactory.create(),
             ],
         )
-
-    def test_post_one_issue_not_in_review_should_send_default_message_to_slack(self):
-        """
-        Test a situation where there was a issue but not IN REVIEW.
-
-        In this situation the Sprint board contained only one issue that doesn't have a IN REVIEW status.
-        A default message should be send to slack because the status isn't correct.
-        """
-        jira_issue = JiraResponseFactory.create(
-            issues=[
-                JiraIssueFactory.create(fields__status=StatusFactory.create(name='In Progress')),
-            ],
-        )
-        self.responses.add(
-            self.responses.GET,
-            self.jira_sprint_api_url,
-            json=jira_issue,
-        )
-        expected_message = self._get_expected_no_pull_request_message()
-
-        self.loop.run_until_complete(self.bridge.run())
-
-        self.chat_postMessage.assert_awaited_once_with(channel=ANY, **expected_message)
 
     def test_post_one_issue_in_review_without_pull_requests_should_send_default_message_to_slack(self):
         """
@@ -179,13 +156,13 @@ class TestIntegrity(TestCase):
         expected_message = SlackMessageFactory.create(
             blocks=[
                 SectionBlockFactory.create(
-                    text__text=':bell:  *Pull requests newsletter*  :bell:',
+                    text__text=':bell:  *Pull requests report*  :bell:',
                     text__type='mrkdwn',
                 ),
                 ContextBlockFactory.create(),
                 DividerBlockFactory.create(),
                 SectionBlockFactory.create(
-                    text__text=f' :bender: *{jira_response["issues"][0]["fields"]["summary"]}* :bender:',
+                    text__text=f':bender: *[{jira_response["issues"][0]["key"]}] {jira_response["issues"][0]["fields"]["summary"]}*',
                     text__type='mrkdwn',
                 ),
                 SectionButtonFactory.create(
@@ -233,11 +210,11 @@ class TestIntegrity(TestCase):
         self.m_get.return_value.__aenter__.return_value.json = CoroutineMock(return_value=bitbucket_response)
         expected_message = SlackMessageFactory.create(
             blocks=[
-                SectionBlockFactory.create(text__text=':bell:  *Pull requests newsletter*  :bell:', text__type='mrkdwn'),
+                SectionBlockFactory.create(text__text=':bell:  *Pull requests report*  :bell:', text__type='mrkdwn'),
                 ContextBlockFactory.create(),
                 DividerBlockFactory.create(),
                 SectionBlockFactory.create(
-                    text__text=f' :bender: *{jira_response["issues"][0]["fields"]["summary"]}* :bender:',
+                    text__text=f':bender: *[{jira_response["issues"][0]["key"]}] {jira_response["issues"][0]["fields"]["summary"]}*',
                     text__type='mrkdwn',
                 ),
                 SectionButtonFactory.create(
@@ -255,30 +232,6 @@ class TestIntegrity(TestCase):
                 DividerBlockFactory.create(),
             ],
         )
-
-        self.loop.run_until_complete(self.bridge.run())
-
-        self.chat_postMessage.assert_awaited_once_with(channel=ANY, **expected_message)
-
-    def test_post_two_issues_not_in_review_should_send_default_message_to_slack(self):
-        """
-        Test a situation where there were two issues but not IN REVIEW.
-
-        In this situation the Sprint board contained two issues that didn't have a IN REVIEW status.
-        A default message should be send to slack because their statuses aren't correct.
-        """
-        jira_issues = JiraResponseFactory.create(
-            issues=JiraIssueFactory.create_batch(
-                size=2,
-                fields__status=StatusFactory.create(name=Iterator(['In Progress', 'Done'])),
-            ),
-        )
-        self.responses.add(
-            self.responses.GET,
-            self.jira_sprint_api_url,
-            json=jira_issues,
-        )
-        expected_message = self._get_expected_no_pull_request_message()
 
         self.loop.run_until_complete(self.bridge.run())
 
@@ -354,11 +307,11 @@ class TestIntegrity(TestCase):
         self.m_get.return_value.__aenter__.return_value.json = CoroutineMock(side_effect=bitbucket_responses)
         expected_message = SlackMessageFactory.create(
             blocks=[
-                SectionBlockFactory.create(text__text=':bell:  *Pull requests newsletter*  :bell:', text__type='mrkdwn'),
+                SectionBlockFactory.create(text__text=':bell:  *Pull requests report*  :bell:', text__type='mrkdwn'),
                 ContextBlockFactory.create(),
                 DividerBlockFactory.create(),
                 SectionBlockFactory.create(
-                    text__text=f' :bender: *{jira_response["issues"][0]["fields"]["summary"]}* :bender:',
+                    text__text=f':bender: *[{jira_response["issues"][0]["key"]}] {jira_response["issues"][0]["fields"]["summary"]}*',
                     text__type='mrkdwn',
                 ),
                 SectionButtonFactory.create(
@@ -369,7 +322,7 @@ class TestIntegrity(TestCase):
                 ),
                 DividerBlockFactory.create(),
                 SectionBlockFactory.create(
-                    text__text=f' :bender: *{jira_response["issues"][1]["fields"]["summary"]}* :bender:',
+                    text__text=f':bender: *[{jira_response["issues"][1]["key"]}] {jira_response["issues"][1]["fields"]["summary"]}*',
                     text__type='mrkdwn',
                 ),
                 SectionButtonFactory.create(
@@ -422,11 +375,11 @@ class TestIntegrity(TestCase):
         self.m_get.return_value.__aenter__.return_value.json = CoroutineMock(side_effect=bitbucket_responses)
         expected_message = SlackMessageFactory.create(
             blocks=[
-                SectionBlockFactory.create(text__text=':bell:  *Pull requests newsletter*  :bell:', text__type='mrkdwn'),
+                SectionBlockFactory.create(text__text=':bell:  *Pull requests report*  :bell:', text__type='mrkdwn'),
                 ContextBlockFactory.create(),
                 DividerBlockFactory.create(),
                 SectionBlockFactory.create(
-                    text__text=f' :bender: *{jira_response["issues"][0]["fields"]["summary"]}* :bender:',
+                    text__text=f':bender: *[{jira_response["issues"][0]["key"]}] {jira_response["issues"][0]["fields"]["summary"]}*',
                     text__type='mrkdwn',
                 ),
                 SectionButtonFactory.create(
@@ -443,7 +396,7 @@ class TestIntegrity(TestCase):
                 ),
                 DividerBlockFactory.create(),
                 SectionBlockFactory.create(
-                    text__text=f' :bender: *{jira_response["issues"][1]["fields"]["summary"]}* :bender:',
+                    text__text=f':bender: *[{jira_response["issues"][1]["key"]}] {jira_response["issues"][1]["fields"]["summary"]}*',
                     text__type='mrkdwn',
                 ),
                 SectionButtonFactory.create(

@@ -3,7 +3,7 @@ import asyncio
 import logging
 import time
 
-from ..bridge import Bridge
+from reporter.bridge import Bridge
 
 logging.basicConfig(filename='reporter.log', level=logging.INFO)
 
