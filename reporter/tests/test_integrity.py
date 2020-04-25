@@ -8,18 +8,18 @@ from responses import RequestsMock
 from slack import WebClient
 
 from ..bridge import Bridge
-from reporter.factories import (
+from ..factories.bitbucket import (
     BitBucketIssueFactory,
     BitBucketResponseFactory,
     PullRequestFactory,
     ReviewerFactory,
 )
-from reporter.factories import (
+from ..factories.jira import (
     JiraIssueFactory,
     JiraResponseFactory,
     StatusFactory,
 )
-from reporter.factories.slack import (
+from ..factories.slack import (
     ContextBlockFactory,
     DividerBlockFactory,
     SectionBlockFactory,
