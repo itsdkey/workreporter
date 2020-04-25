@@ -8,19 +8,23 @@ from responses import RequestsMock
 from slack import WebClient
 
 from ..bridge import Bridge
-from ..factories import (
+from ..factories.bitbucket import (
     BitBucketIssueFactory,
     BitBucketResponseFactory,
-    ContextBlockFactory,
-    DividerBlockFactory,
-    JiraIssueFactory,
-    JiraResponseFactory,
     PullRequestFactory,
     ReviewerFactory,
+)
+from ..factories.jira import (
+    JiraIssueFactory,
+    JiraResponseFactory,
+    StatusFactory,
+)
+from ..factories.slack import (
+    ContextBlockFactory,
+    DividerBlockFactory,
     SectionBlockFactory,
     SectionButtonFactory,
     SlackMessageFactory,
-    StatusFactory,
 )
 
 
@@ -105,7 +109,7 @@ class TestIntegrity(TestCase):
         Test a situation where there was a issue IN REVIEW but without any pull requests.
 
         In this situation the Sprint board contained only one issue and it has a IN REVIEW status.
-        A default message should be send to slack because there are no pull requests.
+        A default message should be send to slack because there were no pull requests.
         """
         jira_issue = JiraResponseFactory.create(
             issues=[
@@ -114,7 +118,7 @@ class TestIntegrity(TestCase):
         )
         bitbucket_issue = BitBucketResponseFactory.create(
             detail=[
-                BitBucketIssueFactory.create(id=jira_issue['issues'][0]['id'], pullRequests=[]),
+                BitBucketIssueFactory.create(pullRequests=[]),
             ],
         )
         self.responses.add(
@@ -143,8 +147,6 @@ class TestIntegrity(TestCase):
         )
         key, title = (jira_response['issues'][0]['key'], jira_response['issues'][0]['fields']['summary'])
         bitbucket_issue = BitBucketIssueFactory.create(
-            id=jira_response['issues'][0]['id'],
-            status='In Review',
             pullRequests=[
                 PullRequestFactory.create(
                     status='OPEN',
@@ -200,8 +202,6 @@ class TestIntegrity(TestCase):
         )
         key, title = (jira_response['issues'][0]['key'], jira_response['issues'][0]['fields']['summary'])
         bitbucket_issue = BitBucketIssueFactory.create(
-            id=jira_response['issues'][0]['id'],
-            status='In Review',
             pullRequests=PullRequestFactory.create_batch(
                 size=2,
                 status='OPEN',
@@ -257,7 +257,6 @@ class TestIntegrity(TestCase):
         bitbucket_issues = BitBucketIssueFactory.create_batch(
                 size=len(jira_issues['issues']),
                 pullRequests=[],
-                id=Iterator([i['id'] for i in jira_issues['issues']]),
         )
         bitbucket_responses = BitBucketResponseFactory.create_batch(
             size=2,
@@ -294,8 +293,6 @@ class TestIntegrity(TestCase):
         )
         bitbucket_issues = BitBucketIssueFactory.create_batch(
             size=2,
-            id=Iterator([i['id'] for i in jira_response['issues']]),
-            status='In Review',
             pullRequests=[
                 PullRequestFactory.create(
                     status='OPEN',
@@ -367,8 +364,6 @@ class TestIntegrity(TestCase):
         )
         bitbucket_issues = BitBucketIssueFactory.create_batch(
             size=2,
-            id=Iterator([i['id'] for i in jira_response['issues']]),
-            status='In Review',
             pullRequests=PullRequestFactory.create_batch(
                 size=2,
                 status='OPEN',
