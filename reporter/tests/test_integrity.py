@@ -109,7 +109,7 @@ class TestIntegrity(TestCase):
         Test a situation where there was a issue IN REVIEW but without any pull requests.
 
         In this situation the Sprint board contained only one issue and it has a IN REVIEW status.
-        A default message should be send to slack because there are no pull requests.
+        A default message should be send to slack because there were no pull requests.
         """
         jira_issue = JiraResponseFactory.create(
             issues=[

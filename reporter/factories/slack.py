@@ -71,7 +71,12 @@ class BlockFactory(DictFactory):
 
 
 class SlackMessageFactory(DictFactory):
-    """A factory for a slack message."""
+    """
+    A factory for a slack message.
+    This message is built via block kits that is a UI framework designed for slack.
+    Support url:
+        https://api.slack.com/block-kit
+    """
 
     blocks = List([
         SectionBlockFactory(),
