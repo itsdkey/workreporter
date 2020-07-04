@@ -63,7 +63,7 @@ class SlackApp:
         :param pull_requests: information about the pull requests
         """
         header = self._render_template('header.json')
-        author = self._render_template('autor.json')
+        author = self._render_template('author.json')
         author['elements'][1]['text'] = self.version
         divider = self._render_template('divider.json')
         title_block = self._render_template('title.json')
@@ -130,7 +130,7 @@ class SlackApp:
         :param first_time: a boolean to control if this is the first call (for recursion break)
         """
         try:
-            user = next(filter(lambda x: x.get('real_name') == name, users))
+            user = next(filter(lambda x: x['profile'].get('real_name_normalized') == name, users))
         except StopIteration:
             name = slughifi(name).decode('utf-8')
             if first_time:
