@@ -4,7 +4,7 @@ from typing import Union
 from server.utils import get_redis_instance
 
 
-def get_value_from_redis(key: str) -> Union[None, list, dict]:
+def get_value_from_redis(key: str) -> Union[None, str, list, dict]:
     """Get the value from redis if a key exists.
 
     :param key: the key to look for in Redis.

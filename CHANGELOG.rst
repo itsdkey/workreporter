@@ -2,6 +2,14 @@
 CHANGELOG
 =========
 
+0.0.5 (27.07.2020)
+-----------------
+
+**Updates**
+
+1. Added endpoint for storing sprint number in redis
+    `/changesprint <int>`
+
 0.0.4 (9.04.2020)
 -----------------
 

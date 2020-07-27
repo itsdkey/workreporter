@@ -10,6 +10,7 @@ from reporter.apps import SlackApp
 from server.configuration.settings import SIGNING_SECRET
 
 from .tasks import handle_message
+from .utils import get_redis_instance
 
 
 class HomeHandler(RequestHandler):
@@ -100,3 +101,44 @@ class SlackHandler(RequestHandler):
             access_log.error(f'Muting retires: {self.request.headers.get("X-Slack-Retry-Num")}')
             return None
         return message
+
+
+class SprintChangeHandler(RequestHandler):
+    """Class for handling sprint change slash command from slack API."""
+
+    def data_received(self, chunk: bytes) -> Optional[Awaitable[None]]:
+        pass
+
+    def post(self) -> None:
+        """Handle the HTTP POST method."""
+        slack_app = SlackApp()
+        sprint_number = self._validate_message(self.get_argument('text'))
+        if not sprint_number:
+            slack_app.slack.chat_postMessage(
+                channel=slack_app.channel_id,
+                text=f"You've passed an invalid sprint number: {self.get_argument('text')}."
+                     f' Please follow this syntax: <int>',
+            )
+            return
+
+        with get_redis_instance() as redis:
+            redis.set('sprint-number', sprint_number)
+        slack_app.slack.chat_postMessage(
+            channel=slack_app.channel_id,
+            text=f'Sprint number set to {sprint_number}...',
+        )
+
+    def _validate_message(self, sprint_number: str) -> Optional[int]:
+        """
+        Validate the text sent to this endpoint.
+        It should be an sprint number <int>.
+
+        :param sprint_number: a sprint number
+        """
+        try:
+            value = int(sprint_number)
+        except ValueError:
+            error = f'Invalid sprint number! Required int, got "{sprint_number}"'
+            access_log.error(error)
+            return None
+        return value

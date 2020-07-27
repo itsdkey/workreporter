@@ -7,9 +7,10 @@ from aiohttp import BasicAuth, ClientSession
 import requests
 from requests.exceptions import ConnectionError, Timeout
 
-from .conf import JIRA_AUTH, JIRA_DOMAIN
+from .conf import JIRA_AUTH, JIRA_DOMAIN, JIRA_SPRINT
 from .exceptions import ResponseStatusCodeException
 from .parsers import JiraParser
+from .utils import get_value_from_redis
 
 logger = logging.getLogger('reporter')
 
@@ -63,11 +64,22 @@ class JiraAdapter(BaseAdapter):
     auth = JIRA_AUTH
     domain = JIRA_DOMAIN
 
-    def __init__(self, sprint: int):
+    def __init__(self, sprint: int = None):
         """Initialize."""
         super().__init__()
-        self.sprint = sprint
+        self.sprint = sprint or self._get_sprint_number()
         self._parser = JiraParser()
+
+    @staticmethod
+    def _get_sprint_number() -> int:
+        """
+        Get sprint number from Redis.
+        If it doesn't exist, return a default number from .env.
+        """
+        sprint = get_value_from_redis('sprint-number')
+        if not sprint:
+            sprint = JIRA_SPRINT
+        return int(sprint)
 
     def get_sprint_board_issues(self) -> list:
         """

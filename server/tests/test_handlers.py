@@ -3,6 +3,7 @@ import hmac
 import json
 from time import time
 from unittest.mock import patch
+from urllib.parse import urlencode
 
 from fakeredis import FakeRedis
 from slack import WebClient
@@ -12,7 +13,7 @@ from tornado.web import Application, url
 from server.configuration.application import MyApplication
 from server.configuration.settings import SIGNING_SECRET
 
-from ..handlers import HomeHandler, SlackHandler
+from ..handlers import HomeHandler, SlackHandler, SprintChangeHandler
 
 
 class HomeHandlerTestCase(AsyncHTTPTestCase):
@@ -351,3 +352,70 @@ class SlackHandlerTestCase(AsyncHTTPTestCase):
         self.assertEqual(response.code, 200)
         self.task_delay.assert_not_called()
         m_postmessage.assert_not_called()
+
+
+class SprintChangeHandlerTestCase(AsyncHTTPTestCase):
+    """TestCase for the SprintChangeHandler."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Set up class fixture before running tests in the class."""
+        cls.url = '/sprint/change/'
+        cls.fake_redis = FakeRedis()
+
+    def setUp(self) -> None:
+        """Set up the test fixture before exercising it."""
+        super().setUp()
+        self.addCleanup(patch.stopall)
+        patch('server.utils.Redis', return_value=self.fake_redis).start()
+
+        self.data = {
+            'channel_id': 'CTHGW076H',
+            'channel_name': 'testdave',
+            'command': '/changesprint',
+            'response_url': 'https://hooks.slack.com/commands/T06KLH51S/1265250490467/bwB31VdEEgRXkWk4m4jqxIj8',
+            'team_domain': 'beefee',
+            'team_id': 'T06KLH51S',
+            'text': '400',
+            'token': 'gu8mEk574ugENdhcg8adgywv',
+            'trigger_id': '1271230064692.6666583060.8555f8ead3a8c30615121b28149e891b',
+            'user_id': 'TEST1234',
+            'user_name': 'joe.doe',
+        }
+
+    def tearDown(self) -> None:
+        self.fake_redis.flushall()
+
+    def get_app(self) -> Application:
+        """Return a Tornado application."""
+        app = MyApplication(
+            urls=[
+                url(self.url, SprintChangeHandler),
+            ],
+        )
+        return app
+
+    def test_saves_sprint_number_into_redis_when_valid(self):
+        expected_value = int(self.data['text'])
+
+        response = self.fetch(
+            self.url,
+            method='POST',
+            body=urlencode(self.data),
+        )
+
+        value = self.fake_redis.get('sprint-number').decode('utf-8')
+        self.assertEqual(response.code, 200)
+        self.assertEqual(expected_value, int(value))
+
+    def test_does_not_save_sprint_number_when_it_is_invalid(self):
+        self.data['text'] = 'test'
+
+        response = self.fetch(
+            self.url,
+            method='POST',
+            body=urlencode(self.data),
+        )
+
+        self.assertEqual(response.code, 200)
+        self.assertFalse(self.fake_redis.exists('sprint-number'))
