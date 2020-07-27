@@ -4,7 +4,7 @@ from .apps import JiraApp, SlackApp
 class Bridge:
     """Class for representing a bridge between Jira and Slack."""
 
-    def __init__(self, sprint_number=None, **kwargs):
+    def __init__(self, sprint_number: int = None, **kwargs):
         """
         Initialize.
 

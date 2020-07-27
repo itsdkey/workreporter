@@ -7,7 +7,7 @@ from typing import Optional
 from slack import WebClient
 
 from .adapters import JiraAdapter
-from .conf import JIRA_SPRINT, SLACK_CHANNEL_ID, SLACK_TOKEN
+from .conf import SLACK_CHANNEL_ID, SLACK_TOKEN
 from .slughify import slughifi
 from .utils import get_value_from_redis, set_key_in_redis
 
@@ -17,7 +17,7 @@ __version__ = '0.0.4'
 class JiraApp:
     """A class responsible for logic related to Jira."""
 
-    def __init__(self, sprint: int, **kwargs):
+    def __init__(self, sprint: int = None, **kwargs):
         """
         Initialize.
 
@@ -25,7 +25,6 @@ class JiraApp:
         :param kwargs: additional values such as filter name and value for
             the filter
         """
-        sprint = sprint or JIRA_SPRINT
         self.adapter = JiraAdapter(sprint)
 
     async def run(self) -> list:
