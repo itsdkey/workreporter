@@ -43,8 +43,6 @@ class TestIntegrity(TestCase):
 
     def setUp(self):
         """Set up the test fixture before exercising it."""
-        self.bridge = Bridge(self.sprint)
-
         self.addCleanup(patch.stopall)
         self.addCleanup(self.responses.reset)
         self.responses.start()
@@ -53,6 +51,8 @@ class TestIntegrity(TestCase):
         self.chat_postMessage = self.patcher.start()
         patch.object(WebClient, 'users_list', new=CoroutineMock(return_value=self._get_users_list())).start()
         self.m_get = patch.object(ClientSession, 'get', return_value=MagicMock()).start()
+
+        self.bridge = Bridge(self.sprint)
 
     def tearDown(self):
         """Deconstruct the test fixture after testing it."""
