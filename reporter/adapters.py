@@ -77,7 +77,9 @@ class JiraAdapter(BaseAdapter):
         If it doesn't exist, return a default number from .env.
         """
         sprint = get_value_from_redis('sprint-number')
-        return sprint or JIRA_SPRINT
+        if not sprint:
+            sprint = JIRA_SPRINT
+        return int(sprint)
 
     def get_sprint_board_issues(self) -> list:
         """

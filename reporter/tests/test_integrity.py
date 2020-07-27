@@ -43,21 +43,20 @@ class TestIntegrity(TestCase):
 
     def setUp(self):
         """Set up the test fixture before exercising it."""
-        self.responses.start()
+        self.bridge = Bridge(self.sprint)
 
         self.addCleanup(patch.stopall)
+        self.addCleanup(self.responses.reset)
+        self.responses.start()
         patch('reporter.utils.get_redis_instance', return_value=self.fake_redis).start()
         self.patcher = patch.object(WebClient, 'chat_postMessage', new=CoroutineMock())
         self.chat_postMessage = self.patcher.start()
         patch.object(WebClient, 'users_list', new=CoroutineMock(return_value=self._get_users_list())).start()
         self.m_get = patch.object(ClientSession, 'get', return_value=MagicMock()).start()
 
-        self.bridge = Bridge(self.sprint)
-
     def tearDown(self):
         """Deconstruct the test fixture after testing it."""
         self.responses.stop()
-        self.responses.reset()
         self.fake_redis.flushall()
 
     @staticmethod
@@ -103,6 +102,71 @@ class TestIntegrity(TestCase):
                 DividerBlockFactory.create(),
             ],
         )
+
+    def test_post_loads_sprint_number_from_redis_and_sends_default_message_to_slack(self):
+        """
+        Test a situation where there was a issue IN REVIEW but without any pull requests.
+
+        In this situation we load the sprint number from Redis and the Sprint board contains only one issue and it has
+        a IN REVIEW status. A default message should be send to slack because there were no pull requests.
+        """
+        sprint = 100
+        jira_sprint_api_url = f'https://empsgourp.atlassian.net/rest/agile/1.0/sprint/{sprint}/issue'
+        self.fake_redis.set('sprint-number', sprint)
+        jira_issue = JiraResponseFactory.create(
+            issues=[
+                JiraIssueFactory.create(fields__status=StatusFactory.create(name='In Review')),
+            ],
+        )
+        bitbucket_issue = BitBucketResponseFactory.create(
+            detail=[
+                BitBucketIssueFactory.create(pullRequests=[]),
+            ],
+        )
+        self.responses.add(
+            self.responses.GET,
+            jira_sprint_api_url,
+            json=jira_issue,
+        )
+        self.m_get.return_value.__aenter__.return_value.json = CoroutineMock(return_value=bitbucket_issue)
+        expected_message = self._get_expected_no_pull_request_message()
+        bridge = Bridge()
+
+        self.loop.run_until_complete(bridge.run())
+
+        self.chat_postMessage.assert_awaited_once_with(channel=ANY, **expected_message)
+
+    @patch('reporter.adapters.JIRA_SPRINT', '100')
+    def test_post_loads_sprint_number_from_env_and_sends_default_message_to_slack(self):
+        """
+        Test a situation where there was a issue IN REVIEW but without any pull requests.
+
+        In this situation we load the sprint number from .env and the Sprint board contains only one issue and it has
+        a IN REVIEW status. A default message should be send to slack because there were no pull requests.
+        """
+        jira_sprint_api_url = f'https://empsgourp.atlassian.net/rest/agile/1.0/sprint/100/issue'
+        jira_issue = JiraResponseFactory.create(
+            issues=[
+                JiraIssueFactory.create(fields__status=StatusFactory.create(name='In Review')),
+            ],
+        )
+        bitbucket_issue = BitBucketResponseFactory.create(
+            detail=[
+                BitBucketIssueFactory.create(pullRequests=[]),
+            ],
+        )
+        self.responses.add(
+            self.responses.GET,
+            jira_sprint_api_url,
+            json=jira_issue,
+        )
+        self.m_get.return_value.__aenter__.return_value.json = CoroutineMock(return_value=bitbucket_issue)
+        expected_message = self._get_expected_no_pull_request_message()
+        bridge = Bridge()
+
+        self.loop.run_until_complete(bridge.run())
+
+        self.chat_postMessage.assert_awaited_once_with(channel=ANY, **expected_message)
 
     def test_post_one_issue_in_review_without_pull_requests_should_send_default_message_to_slack(self):
         """

@@ -25,12 +25,12 @@ class TestBaseAdapter(TestCase):
         self.adapter = BaseAdapter(domain=self.domain)
 
         self.addCleanup(patch.stopall)
+        self.addCleanup(self.responses.reset)
         self.responses.start()
 
     def tearDown(self):
         """Deconstruct the test fixture after testing it."""
         self.responses.stop()
-        self.responses.reset()
 
     def test_get_raises_ConnectionError(self):
         """Test if a ConnectionError was raised."""
