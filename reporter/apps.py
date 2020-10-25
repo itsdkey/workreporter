@@ -91,7 +91,7 @@ class SlackApp:
                 title['text']['text'] = f':bender: *[{issue["key"]}] {issue["title"]}*'
                 message['blocks'].extend([title] + descriptions + [divider])
 
-            if len(message['blocks']) > 50:
+            if len(message['blocks']) > 45:
                 tasks.append(asyncio.create_task(self.send_message(message)))
                 message = {'blocks': deepcopy(starting_blocks)}
 
