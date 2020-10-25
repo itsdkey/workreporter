@@ -67,13 +67,13 @@ class SlackApp:
         divider = self._render_template('divider.json')
         title_block = self._render_template('title.json')
         description_block = self._render_template('description.json')
-        message = {
-            'blocks': [
-                header,
-                author,
-                divider,
-            ],
-        }
+        starting_blocks = [
+            header,
+            author,
+            divider,
+        ]
+        message = {'blocks': deepcopy(starting_blocks)}
+        tasks = []
         for issue in pull_requests:
             title = deepcopy(title_block)
             descriptions = []
@@ -91,8 +91,15 @@ class SlackApp:
                 title['text']['text'] = f':bender: *[{issue["key"]}] {issue["title"]}*'
                 message['blocks'].extend([title] + descriptions + [divider])
 
+            if len(message['blocks']) > 50:
+                tasks.append(asyncio.create_task(self.send_message(message)))
+                message = {'blocks': deepcopy(starting_blocks)}
+
+        if not tasks:
+            tasks = [message]
+
         set_key_in_redis('slack-known-user-ids', self.known_user_ids)
-        await self.send_message(message)
+        await asyncio.gather(*tasks)
 
     def _get_user_mention(self, name: str) -> str:
         """
