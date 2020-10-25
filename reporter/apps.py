@@ -11,7 +11,7 @@ from .conf import SLACK_CHANNEL_ID, SLACK_TOKEN
 from .slughify import slughifi
 from .utils import get_value_from_redis, set_key_in_redis
 
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 
 
 class JiraApp:
