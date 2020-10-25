@@ -96,7 +96,7 @@ class SlackApp:
                 message = {'blocks': deepcopy(starting_blocks)}
 
         if not tasks:
-            tasks = [message]
+            tasks.append(asyncio.create_task(self.send_message(message)))
 
         set_key_in_redis('slack-known-user-ids', self.known_user_ids)
         await asyncio.gather(*tasks)
