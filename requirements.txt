@@ -6,9 +6,6 @@ coverage
 factory_boy
 fakeredis
 flake8
-gitlint
-ipdb
-ipython
 isort
 pre-commit
 pydocstyle
