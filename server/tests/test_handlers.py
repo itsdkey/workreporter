@@ -2,11 +2,11 @@ import hashlib
 import hmac
 import json
 from time import time
-from unittest.mock import patch
 from urllib.parse import urlencode
 
+from asynctest import patch
 from fakeredis import FakeRedis
-from slack import WebClient
+from slack_sdk.web.async_client import AsyncWebClient
 from tornado.testing import AsyncHTTPTestCase
 from tornado.web import Application, url
 
@@ -173,7 +173,7 @@ class SlackHandlerTestCase(AsyncHTTPTestCase):
 
         self.assertEqual(response.code, 403)
 
-    @patch.object(WebClient, 'chat_postMessage')
+    @patch.object(AsyncWebClient, 'chat_postMessage')
     def test_post_calls_task_and_posts_pending_message_to_slack_when_message_is_valid(self, m_postmessage):
         """Test post calls thats and informs the user that it will respond in a moment."""
         channel = 'testchannel'
@@ -215,9 +215,9 @@ class SlackHandlerTestCase(AsyncHTTPTestCase):
 
         self.assertEqual(response.code, 200)
         self.assertTrue(self.task_delay.called)
-        m_postmessage.assert_called_once_with(channel=channel, text="I'll respond in a moment...")
+        m_postmessage.assert_awaited_once_with(channel=channel, text="I'll respond in a moment...")
 
-    @patch.object(WebClient, 'chat_postMessage')
+    @patch.object(AsyncWebClient, 'chat_postMessage')
     def test_post_does_nothing_when_message_is_not_from_an_valid_channel(self, m_postmessage):
         """Test if a message is handled when it came from a channel_type=channel."""
         data = {
@@ -260,7 +260,7 @@ class SlackHandlerTestCase(AsyncHTTPTestCase):
         self.task_delay.assert_not_called()
         m_postmessage.assert_not_called()
 
-    @patch.object(WebClient, 'chat_postMessage')
+    @patch.object(AsyncWebClient, 'chat_postMessage')
     def test_post_does_nothing_when_message_is_a_bot_response(self, m_postmessage):
         """Test if a message is handled when the message was sent by a bot."""
         data = {
@@ -308,7 +308,7 @@ class SlackHandlerTestCase(AsyncHTTPTestCase):
         self.task_delay.assert_not_called()
         m_postmessage.assert_not_called()
 
-    @patch.object(WebClient, 'chat_postMessage')
+    @patch.object(AsyncWebClient, 'chat_postMessage')
     def test_post_does_nothing_when_message_is_a_retry(self, m_postmessage):
         """Test if a message is handled when the message was sent as a retry message."""
         data = {

@@ -4,14 +4,14 @@ import json
 import os
 from typing import Optional
 
-from slack import WebClient
+from slack_sdk.web.async_client import AsyncWebClient
 
 from .adapters import JiraAdapter
 from .conf import SLACK_CHANNEL_ID, SLACK_TOKEN
 from .slughify import slughifi
 from .utils import get_value_from_redis, set_key_in_redis
 
-__version__ = '0.0.6'
+__version__ = '0.0.7'
 
 
 class JiraApp:
@@ -39,13 +39,11 @@ class SlackApp:
 
     def __init__(self, **kwargs):
         """Initialize."""
-        loop = kwargs.get('loop') or asyncio.get_event_loop()
-
         self.version = f'*version:* {__version__}'
         self.channel_id = kwargs.get('channel_id') or SLACK_CHANNEL_ID
         self.known_user_ids = get_value_from_redis('slack-known-user-ids') or {}
 
-        self.slack = WebClient(token=SLACK_TOKEN, loop=loop, run_async=True)
+        self.slack = AsyncWebClient(token=SLACK_TOKEN)
         self.blocks = {
             'header': self._render_template('header.json'),
             'author': self._render_template('author.json'),

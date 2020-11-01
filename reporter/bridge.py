@@ -11,7 +11,7 @@ class Bridge:
         :param sprint_number: a number of the sprint to search
         """
         self.jira = JiraApp(sprint_number, **kwargs)
-        self.slack = SlackApp(channel_id=kwargs.get('channel_id'), loop=kwargs.get('loop'))
+        self.slack = SlackApp(channel_id=kwargs.get('channel_id'))
 
     async def run(self) -> None:
         """Gather data from Jira and post it to slack."""

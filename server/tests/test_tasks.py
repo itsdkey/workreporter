@@ -2,7 +2,7 @@ from io import StringIO
 
 from asynctest import ANY, CoroutineMock, TestCase, patch
 from fakeredis import FakeRedis
-from slack import WebClient
+from slack_sdk.web.async_client import AsyncWebClient
 
 from reporter.bridge import Bridge
 
@@ -22,7 +22,7 @@ class HandleMessageTestCase(TestCase):
         """Set up the test fixture before exercising it."""
         self.addCleanup(patch.stopall)
         patch('server.utils.Redis', return_value=self.fake_redis).start()
-        self.m_post_message = patch.object(WebClient, 'chat_postMessage', new=CoroutineMock()).start()
+        self.m_post_message = patch.object(AsyncWebClient, 'chat_postMessage', new=CoroutineMock()).start()
         self.bridge_run = patch.object(Bridge, 'run', new=CoroutineMock()).start()
 
     def tearDown(self) -> None:
@@ -124,7 +124,7 @@ class HandleChangelogTestCase(TestCase):
     def setUp(self) -> None:
         """Set up the test fixture before exercising it."""
         self.addCleanup(patch.stopall)
-        self.m_post_message = patch.object(WebClient, 'chat_postMessage', new=CoroutineMock()).start()
+        self.m_post_message = patch.object(AsyncWebClient, 'chat_postMessage', new=CoroutineMock()).start()
         patch('server.utils.Redis', return_value=self.fake_redis).start()
 
     def tearDown(self) -> None:

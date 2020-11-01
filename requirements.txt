@@ -16,7 +16,7 @@ python-dotenv
 redis
 requests
 responses
-slackclient
+slack_sdk
 sphinx
 sphinx-rtd-theme
 tornado
