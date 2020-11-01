@@ -4,7 +4,7 @@ import json
 from time import time
 from urllib.parse import urlencode
 
-from asynctest import patch
+from asynctest import CoroutineMock, patch
 from fakeredis import FakeRedis
 from slack_sdk.web.async_client import AsyncWebClient
 from tornado.testing import AsyncHTTPTestCase
@@ -368,9 +368,10 @@ class SprintChangeHandlerTestCase(AsyncHTTPTestCase):
         super().setUp()
         self.addCleanup(patch.stopall)
         patch('server.utils.Redis', return_value=self.fake_redis).start()
+        self.m_postMessage = patch.object(AsyncWebClient, 'chat_postMessage', new=CoroutineMock()).start()
 
         self.data = {
-            'channel_id': 'CTHGW076H',
+            'channel_id': 'CTHGW076H123',
             'channel_name': 'testdave',
             'command': '/changesprint',
             'response_url': 'https://hooks.slack.com/commands/T06KLH51S/1265250490467/bwB31VdEEgRXkWk4m4jqxIj8',
@@ -407,6 +408,10 @@ class SprintChangeHandlerTestCase(AsyncHTTPTestCase):
         value = self.fake_redis.get('sprint-number').decode('utf-8')
         self.assertEqual(response.code, 200)
         self.assertEqual(expected_value, int(value))
+        self.m_postMessage.assert_awaited_once_with(
+            channel=self.data['channel_id'],
+            text=f'Sprint number set to {value} :)',
+        )
 
     def test_does_not_save_sprint_number_when_it_is_invalid(self):
         self.data['text'] = 'test'
@@ -419,3 +424,8 @@ class SprintChangeHandlerTestCase(AsyncHTTPTestCase):
 
         self.assertEqual(response.code, 200)
         self.assertFalse(self.fake_redis.exists('sprint-number'))
+        self.m_postMessage.assert_awaited_once_with(
+            channel=self.data['channel_id'],
+            text=f"You've passed an invalid sprint number: {self.data['text']}."
+                 f' Please follow this syntax: <int>',
+        )

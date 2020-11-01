@@ -43,7 +43,7 @@ class SlackApp:
         self.channel_id = kwargs.get('channel_id') or SLACK_CHANNEL_ID
         self.known_user_ids = get_value_from_redis('slack-known-user-ids') or {}
 
-        self.slack = AsyncWebClient(token=SLACK_TOKEN)
+        self.client = AsyncWebClient(token=SLACK_TOKEN)
         self.blocks = {
             'header': self._render_template('header.json'),
             'author': self._render_template('author.json'),
@@ -166,4 +166,4 @@ class SlackApp:
         :param message: a dictionary that contains blocks that will be used as
             JSON message to slack.
         """
-        await self.slack.chat_postMessage(channel=self.channel_id, **message)
+        await self.client.chat_postMessage(channel=self.channel_id, **message)

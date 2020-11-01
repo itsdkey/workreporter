@@ -80,7 +80,7 @@ class SlackHandler(RequestHandler):
         if message:
             channel = message['channel']
             slack_app = SlackApp()
-            await slack_app.slack.chat_postMessage(channel=channel, text="I'll respond in a moment...")
+            await slack_app.client.chat_postMessage(channel=channel, text="I'll respond in a moment...")
             access_log.debug(f'Scheduling task...')
             handle_message.delay(message)
 
@@ -111,10 +111,10 @@ class SprintChangeHandler(RequestHandler):
 
     async def post(self) -> None:
         """Handle the HTTP POST method."""
-        slack_app = SlackApp()
+        slack_app = SlackApp(channel_id=self.get_argument('channel_id'))
         sprint_number = self._validate_message(self.get_argument('text'))
         if not sprint_number:
-            await slack_app.slack.chat_postMessage(
+            await slack_app.client.chat_postMessage(
                 channel=slack_app.channel_id,
                 text=f"You've passed an invalid sprint number: {self.get_argument('text')}."
                      f' Please follow this syntax: <int>',
@@ -123,9 +123,9 @@ class SprintChangeHandler(RequestHandler):
 
         with get_redis_instance() as redis:
             redis.set('sprint-number', sprint_number)
-        await slack_app.slack.chat_postMessage(
+        await slack_app.client.chat_postMessage(
             channel=slack_app.channel_id,
-            text=f'Sprint number set to {sprint_number}...',
+            text=f'Sprint number set to {sprint_number} :)',
         )
 
     def _validate_message(self, sprint_number: str) -> Optional[int]:

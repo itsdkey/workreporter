@@ -26,7 +26,7 @@ def display_changelog() -> None:
     loop = asyncio.get_event_loop()
     slack_app = SlackApp()
     loop.run_until_complete(
-        slack_app.slack.chat_postMessage(
+        slack_app.client.chat_postMessage(
             channel=slack_app.channel_id,
             text=changelog,
         ),
@@ -58,7 +58,7 @@ def handle_message(message: dict) -> None:
     else:
         logger.debug('Sprint number not valid')
         loop.run_until_complete(
-            SlackApp().slack.chat_postMessage(
+            SlackApp().client.chat_postMessage(
                 channel=channel,
                 text='Please write in the following syntax "sprint <int>"',
             ),
