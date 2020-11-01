@@ -3,7 +3,7 @@ import json
 import os
 
 from celery.utils.log import get_task_logger
-from slack import WebClient
+from slack_sdk import WebClient
 
 from reporter.apps import SlackApp
 from reporter.bridge import Bridge
@@ -24,9 +24,9 @@ def display_changelog() -> None:
         changelog = temp.read()
 
     loop = asyncio.get_event_loop()
-    slack_app = SlackApp(loop=loop)
+    slack_app = SlackApp()
     loop.run_until_complete(
-        slack_app.slack.chat_postMessage(
+        slack_app.client.chat_postMessage(
             channel=slack_app.channel_id,
             text=changelog,
         ),
@@ -37,7 +37,7 @@ def display_changelog() -> None:
 def display_pull_requests() -> None:
     """Display pull requests as a newsletter."""
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(Bridge(loop=loop).run())
+    loop.run_until_complete(Bridge().run())
 
 
 @app.task
@@ -53,12 +53,12 @@ def handle_message(message: dict) -> None:
     sprint_number = validate_text(message.get('text'))
     if sprint_number:
         logger.debug(f'running for sprint: {sprint_number}')
-        bridge = Bridge(sprint_number, channel_id=channel, loop=loop)
+        bridge = Bridge(sprint_number, channel_id=channel)
         loop.run_until_complete(bridge.run())
     else:
         logger.debug('Sprint number not valid')
         loop.run_until_complete(
-            SlackApp(loop=loop).slack.chat_postMessage(
+            SlackApp().client.chat_postMessage(
                 channel=channel,
                 text='Please write in the following syntax "sprint <int>"',
             ),

@@ -5,7 +5,7 @@ from asynctest import CoroutineMock, MagicMock, TestCase, patch
 from factory import Iterator
 from fakeredis import FakeRedis
 from responses import RequestsMock
-from slack import WebClient
+from slack_sdk.web.async_client import AsyncWebClient
 
 from ..bridge import Bridge
 from ..factories.bitbucket import (
@@ -47,9 +47,9 @@ class TestIntegrity(TestCase):
         self.addCleanup(self.responses.reset)
         self.responses.start()
         patch('reporter.utils.get_redis_instance', return_value=self.fake_redis).start()
-        self.patcher = patch.object(WebClient, 'chat_postMessage', new=CoroutineMock())
+        self.patcher = patch.object(AsyncWebClient, 'chat_postMessage', new=CoroutineMock())
         self.chat_postMessage = self.patcher.start()
-        patch.object(WebClient, 'users_list', new=CoroutineMock(return_value=self._get_users_list())).start()
+        patch.object(AsyncWebClient, 'users_list', new=CoroutineMock(return_value=self._get_users_list())).start()
         self.m_get = patch.object(ClientSession, 'get', return_value=MagicMock()).start()
 
         self.bridge = Bridge(self.sprint)

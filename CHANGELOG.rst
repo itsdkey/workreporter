@@ -2,6 +2,15 @@
 CHANGELOG
 =========
 
+0.0.7 (1.11.2020)
+------------------
+
+**Updates**
+
+1. Code optimization and correcting code quality #24
+
+2. Correcting bug while setting sprint number #23
+
 0.0.6 (25.10.2020)
 ------------------
 
