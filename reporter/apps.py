@@ -46,6 +46,13 @@ class SlackApp:
         self.known_user_ids = get_value_from_redis('slack-known-user-ids') or {}
 
         self.slack = WebClient(token=SLACK_TOKEN, loop=loop, run_async=True)
+        self.blocks = {
+            'header': self._render_template('header.json'),
+            'author': self._render_template('author.json'),
+            'divider': self._render_template('divider.json'),
+            'title': self._render_template('title.json'),
+            'description': self._render_template('description.json'),
+        }
 
     @staticmethod
     def _render_template(filename: str) -> dict:
@@ -55,51 +62,55 @@ class SlackApp:
             template = json.load(json_template)
         return template
 
-    async def remind_about_pull_requests(self, pull_requests: list) -> None:
+    async def remind_about_pull_requests(self, issues: list) -> None:
         """
         Send a reminder about pull requests.
 
-        :param pull_requests: information about the pull requests
+        :param issues: information about issues
         """
-        header = self._render_template('header.json')
-        author = self._render_template('author.json')
+        author = deepcopy(self.blocks['author'])
         author['elements'][1]['text'] = self.version
-        divider = self._render_template('divider.json')
-        title_block = self._render_template('title.json')
-        description_block = self._render_template('description.json')
         starting_blocks = [
-            header,
+            self.blocks['header'],
             author,
-            divider,
+            self.blocks['divider'],
         ]
         message = {'blocks': deepcopy(starting_blocks)}
         tasks = []
-        for issue in pull_requests:
-            title = deepcopy(title_block)
-            descriptions = []
-            for pull_request in issue['pull_requests']:
-                description = deepcopy(description_block)
-                reviewers = map(
-                    lambda name: self._get_user_mention(name),
-                    pull_request['reviewers'],
-                )
-                description['text']['text'] = ' '.join(reviewers)
-                description['accessory']['url'] = pull_request['url']
-                descriptions.append(description)
-
-            if descriptions:
+        for issue in issues:
+            pull_requests = self._create_pull_requests_descriptions(issue['pull_requests'])
+            if pull_requests:
+                title = deepcopy(self.blocks['title'])
                 title['text']['text'] = f':bender: *[{issue["key"]}] {issue["title"]}*'
-                message['blocks'].extend([title] + descriptions + [divider])
+                message['blocks'].extend([title] + pull_requests + [self.blocks['divider']])
 
             if len(message['blocks']) > 45:
                 tasks.append(asyncio.create_task(self.send_message(message)))
                 message = {'blocks': deepcopy(starting_blocks)}
 
         if not tasks:
-            tasks.append(asyncio.create_task(self.send_message(message)))
+            tasks = [asyncio.create_task(self.send_message(message))]
 
         set_key_in_redis('slack-known-user-ids', self.known_user_ids)
         await asyncio.gather(*tasks)
+
+    def _create_pull_requests_descriptions(self, pull_requests: list) -> list:
+        """
+        Create description blocks for existing pull requests
+
+        :param pull_requests: a list of linked pull requests to an issue
+        """
+        descriptions = []
+        for pull_request in pull_requests:
+            description = deepcopy(self.blocks['description'])
+            reviewers = map(
+                lambda name: self._get_user_mention(name),
+                pull_request['reviewers'],
+            )
+            description['text']['text'] = ' '.join(reviewers)
+            description['accessory']['url'] = pull_request['url']
+            descriptions.append(description)
+        return descriptions
 
     def _get_user_mention(self, name: str) -> str:
         """
