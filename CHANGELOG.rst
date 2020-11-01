@@ -2,7 +2,7 @@
 CHANGELOG
 =========
 
-0.0.7 (1.11.2020)
+1.0.0 (1.11.2020)
 ------------------
 
 **Updates**
@@ -10,6 +10,8 @@ CHANGELOG
 1. Code optimization and correcting code quality #24
 
 2. Correcting bug while setting sprint number #23
+
+3. Upgrade to Python3.9 #27
 
 0.0.6 (25.10.2020)
 ------------------
