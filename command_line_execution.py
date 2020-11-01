@@ -5,7 +5,11 @@ import time
 
 from reporter.bridge import Bridge
 
-logging.basicConfig(filename='reporter.log', level=logging.INFO)
+logging.basicConfig(
+    filename='reporter.log',
+    level=logging.INFO,
+    format='%(asctime)-15s %(levelname)-8s %(message)s',
+)
 
 
 async def main(sprint_number):

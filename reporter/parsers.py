@@ -56,12 +56,13 @@ class JiraParser:
         opened_pull_requests = []
         for pull_request in pull_requests:
             if pull_request['status'] == status:
-                reviewers = list(filter(lambda x: not x['approved'], pull_request['reviewers']))
+                reviewers = filter(lambda x: not x['approved'], pull_request['reviewers'])
+                reviewers = [reviewer['name'] for reviewer in reviewers]
                 if reviewers:
                     info = {
                         'author': pull_request['author']['name'],
                         'url': pull_request['url'],
-                        'reviewers': [x['name'] for x in reviewers],
+                        'reviewers': reviewers,
                     }
                     opened_pull_requests.append(info)
         return opened_pull_requests
