@@ -1,0 +1,14 @@
+-r requirements.txt
+aiodns
+aiohttp
+asynctest
+coverage
+factory_boy
+fakeredis
+flake8
+isort
+pre-commit
+pydocstyle
+responses
+sphinx
+sphinx-rtd-theme
