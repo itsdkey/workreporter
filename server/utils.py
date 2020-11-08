@@ -4,6 +4,7 @@ from redis import Redis
 
 from .configuration.settings import (
     REDIS_DATABASE,
+    REDIS_HOST,
     REDIS_PASSWORD,
     REDIS_SOCKET_PATH,
 )
@@ -27,4 +28,10 @@ def validate_text(text: str) -> Optional[int]:
 
 def get_redis_instance() -> Redis:
     """Return a Redis instance with the proper configuration."""
-    return Redis(db=REDIS_DATABASE, unix_socket_path=REDIS_SOCKET_PATH, password=REDIS_PASSWORD)
+    config = {
+        'db': REDIS_DATABASE,
+        'unix_socket_path': REDIS_SOCKET_PATH,
+        'password': REDIS_PASSWORD,
+        'host': REDIS_HOST,
+    }
+    return Redis(**config)

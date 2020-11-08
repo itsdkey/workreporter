@@ -1,10 +1,5 @@
 import os
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
-
 # Slack credentials
 SLACK_CHANNEL_ID = os.environ.get('SLACK_CHANNEL_ID', '')
 SLACK_TOKEN = os.environ['SLACK_TOKEN']

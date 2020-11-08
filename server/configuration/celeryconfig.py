@@ -1,9 +1,6 @@
 import os
 
 from celery.schedules import crontab
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 broker_url = os.environ['BROKER_URL']

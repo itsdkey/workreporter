@@ -1,9 +1,6 @@
 import os
 
-from dotenv import load_dotenv
 from tornado.options import define
-
-load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -25,3 +22,4 @@ SIGNING_SECRET = os.environ['SLACK_SIGNING_SECRET']
 REDIS_SOCKET_PATH = os.environ.get('REDIS_SOCKET_PATH', None)
 REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', None)
 REDIS_DATABASE = os.environ.get('REDIS_DATABASE', 0)
+REDIS_HOST = os.environ['REDIS_HOST']
