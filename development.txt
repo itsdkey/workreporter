@@ -1,6 +1,4 @@
 -r requirements.txt
-aiodns
-aiohttp
 asynctest
 coverage
 factory_boy
