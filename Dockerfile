@@ -4,8 +4,9 @@ WORKDIR /workreporter
 
 # extra dependencies (over what python-slim deps already includes)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-                gcc \
-                libc-dev \
+	gcc \
+    libc-dev \
+	&& apt-get autoremove \
 	&& rm -rf /var/lib/apt/lists/*
 
 COPY . /workreporter
